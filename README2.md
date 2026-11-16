@@ -1,4 +1,4 @@
-# 🚌 Système intelligent de réservation de cars interurbains
+#  Système intelligent de réservation de cars interurbains
 
 **Plateforme de réservation de transport interurbain avec assistant conversationnel basé sur l'intelligence artificielle.**
 
@@ -8,7 +8,7 @@
 [![AI](https://img.shields.io/badge/AI-Groq-8A2BE2)](https://groq.com/)
 [![API](https://img.shields.io/badge/API-REST-green)](https://restfulapi.net/)
 
-## 📌 Présentation du projet
+## Présentation du projet
 
 Ce projet consiste à développer une plateforme numérique intelligente dédiée à la réservation de cars de transport interurbain.
 
@@ -18,7 +18,7 @@ La solution est conçue autour d'une architecture API REST permettant de sépare
 
 Le projet est actuellement développé dans le cadre d'un parcours de formation chez **Simplon Côte d'Ivoire**.
 
-## 🎯 Objectifs
+##  Objectifs
 
 - Digitaliser le processus de réservation de transport interurbain.
 - Faciliter la recherche de voyages et la consultation des disponibilités.
@@ -27,15 +27,15 @@ Le projet est actuellement développé dans le cadre d'un parcours de formation 
 - Intégrer un assistant IA capable d'accompagner les voyageurs.
 - Fournir des indicateurs de suivi aux administrateurs et aux compagnies de transport.
 
-## ✨ Fonctionnalités principales
+##  Fonctionnalités principales
 
-### 👤 Gestion des utilisateurs et authentification
+###  Gestion des utilisateurs et authentification
 - Inscription et connexion des voyageurs.
 - Authentification sécurisée avec CodeIgniter Shield.
 - Gestion des rôles et des permissions.
 - Protection des routes API nécessitant une authentification.
 
-### 🚌 Recherche de voyages
+###  Recherche de voyages
 - Consultation publique des voyages disponibles.
 - Recherche par ville de départ et d'arrivée.
 - Filtrage par date de départ.
@@ -44,7 +44,7 @@ Le projet est actuellement développé dans le cadre d'un parcours de formation 
 
 La consultation des voyages est accessible sans connexion. L'authentification est exigée au moment de la réservation.
 
-### 🎫 Réservation et gestion des sièges
+###  Réservation et gestion des sièges
 - Sélection des sièges disponibles.
 - Création de réservations temporaires.
 - Blocage temporaire des sièges pendant 15 minutes.
@@ -52,7 +52,7 @@ La consultation des voyages est accessible sans connexion. L'authentification es
 - Consultation de l'historique des réservations.
 - Consultation et annulation des réservations selon leur statut.
 
-### 💳 Paiement simulé
+###  Paiement simulé
 - Création de tentatives de paiement.
 - Simulation de paiements par Mobile Money, carte bancaire ou espèces.
 - Gestion des statuts de paiement.
@@ -60,25 +60,25 @@ La consultation des voyages est accessible sans connexion. L'authentification es
 
 **Important :** les paiements sont actuellement simulés. Aucune transaction financière réelle n'est effectuée.
 
-### 📄 Billets électroniques
+###  Billets électroniques
 - Génération automatique d'un billet après confirmation du paiement simulé.
 - Consultation des billets.
 - Téléchargement du billet au format PDF.
 - Informations sur le voyageur, le trajet, les sièges et le paiement.
 
-### 🤖 Assistant conversationnel IA
+###  Assistant conversationnel IA
 - Intégration de l'API Groq.
 - Assistance conversationnelle aux voyageurs.
 - Accès contrôlé aux informations pertinentes de la plateforme.
 - Consultation contextuelle des voyages, réservations et billets de l'utilisateur authentifié.
 
-### 📊 Tableaux de bord
+###  Tableaux de bord
 - Tableau de bord administrateur.
 - Tableau de bord des compagnies.
 - Statistiques sur les utilisateurs, les voyages et les réservations.
 - Suivi des paiements, des revenus enregistrés et des billets.
 
-## 🛠️ Technologies utilisées
+##  Technologies utilisées
 
 | Technologie | Utilisation |
 |---|---|
@@ -93,7 +93,7 @@ La consultation des voyages est accessible sans connexion. L'authentification es
 
 **Frontend prévu :** React pour l'interface web, avec une possibilité d'évolution vers une application mobile.
 
-## 🏗️ Architecture du projet
+##  Architecture du projet
 
 Le projet repose sur une architecture backend API REST organisée autour des contrôleurs, modèles et services.
 
@@ -143,7 +143,7 @@ soutenance-final_bd/
 └── README.md
 ```
 
-## ⚙️ Installation et configuration
+##  Installation et configuration
 
 ### 1. Prérequis
 
@@ -210,7 +210,7 @@ L'application sera accessible à :
 
 `http://localhost:8080`
 
-## 📚 Documentation de l'API
+## Documentation de l'API
 
 La documentation interactive est disponible via Swagger UI :
 
@@ -243,7 +243,7 @@ Le fichier OpenAPI est situé dans :
 
 Les routes protégées nécessitent un jeton d'authentification Bearer, conformément aux permissions définies dans l'application.
 
-## 🔐 Sécurité
+##  Sécurité
 
 Le backend intègre plusieurs mécanismes de sécurité :
 
@@ -255,7 +255,7 @@ Le backend intègre plusieurs mécanismes de sécurité :
 - Contrôle de disponibilité des sièges côté serveur.
 - Gestion des expirations de réservations temporaires.
 
-## 🚀 Perspectives d'évolution
+##  Perspectives d'évolution
 
 - Développement de l'interface web avec React.
 - Adaptation de l'application aux terminaux mobiles.
@@ -264,7 +264,7 @@ Le backend intègre plusieurs mécanismes de sécurité :
 - Amélioration des fonctionnalités de fidélisation.
 - Extension progressive du service à d'autres destinations en Afrique.
 
-## 👨‍💻 Auteur
+##  Auteur
 
 **Régis Yoh**
 
