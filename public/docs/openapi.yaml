@@ -1,0 +1,861 @@
+﻿openapi: 3.0.3
+
+info:
+  title: API de réservation de cars
+  version: 1.0.0
+  description: |
+    API REST de réservation de transport interurbain.
+    
+    La consultation des villes, compagnies et voyages est publique.
+    La création d'une réservation nécessite une authentification.
+    Les paiements disponibles sont des simulations et ne débitent aucun compte réel.
+
+servers:
+  - url: http://localhost:8080
+    description: Serveur local CodeIgniter
+
+tags:
+  - name: Villes
+  - name: Compagnies
+  - name: Voyages
+  - name: Authentification
+  - name: Réservations
+  - name: Paiements
+  - name: Billets
+  - name: Chatbot
+  - name: Tableaux de bord
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  /api/cities:
+    get:
+      tags: [Villes]
+      summary: Lister les villes actives
+      description: Route publique. Retourne les villes actives triées par nom.
+      security: []
+      responses:
+        '200':
+          description: Liste des villes récupérée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+
+  /api/companies:
+    get:
+      tags: [Compagnies]
+      summary: Lister les compagnies
+      description: Route publique.
+      security: []
+      responses:
+        '200':
+          description: Liste des compagnies récupérée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+
+  /api/companies/{id}:
+    get:
+      tags: [Compagnies]
+      summary: Consulter une compagnie
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Compagnie récupérée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/trips:
+    get:
+      tags: [Voyages]
+      summary: Rechercher les voyages disponibles
+      description: |
+        Route publique. Les résultats ne comprennent que les voyages
+        répondant aux critères de disponibilité définis par le backend.
+      security: []
+      parameters:
+        - name: departure_city_id
+          in: query
+          required: false
+          description: Identifiant de la ville de départ.
+          schema:
+            type: integer
+            minimum: 1
+        - name: arrival_city_id
+          in: query
+          required: false
+          description: Identifiant de la ville d'arrivée.
+          schema:
+            type: integer
+            minimum: 1
+        - name: departure_date
+          in: query
+          required: false
+          description: Date de départ au format YYYY-MM-DD.
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Liste des voyages récupérée.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Trip'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/trips/{id}:
+    get:
+      tags: [Voyages]
+      summary: Consulter le détail d'un voyage
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Voyage récupéré.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Trip'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/auth/register:
+    post:
+      tags: [Authentification]
+      summary: Créer un compte voyageur
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+                - password_confirm
+              properties:
+                first_name:
+                  type: string
+                  example: Amani
+                last_name:
+                  type: string
+                  example: N'Guessan
+                email:
+                  type: string
+                  format: email
+                  example: amani@example.com
+                phone:
+                  type: string
+                  example: "0700000000"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                password_confirm:
+                  type: string
+                  format: password
+      responses:
+        '201':
+          description: Compte créé et jeton généré.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Adresse e-mail déjà utilisée.
+        '422':
+          description: Données invalides.
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/auth/login:
+    post:
+      tags: [Authentification]
+      summary: Connecter un utilisateur
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Connexion réussie.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Identifiants incorrects.
+        '403':
+          description: Compte désactivé ou suspendu.
+        '422':
+          description: Champs obligatoires manquants.
+
+  /api/auth/me:
+    get:
+      tags: [Authentification]
+      summary: Récupérer le profil connecté
+      responses:
+        '200':
+          description: Profil utilisateur récupéré.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentification]
+      summary: Déconnecter l'utilisateur
+      responses:
+        '200':
+          description: Déconnexion effectuée.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/reservations:
+    post:
+      tags: [Réservations]
+      summary: Créer une réservation temporaire
+      description: |
+        Réservé aux voyageurs authentifiés.
+        La réservation temporaire expire après 15 minutes.
+        Le montant est calculé côté serveur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trip_id, seat_ids]
+              properties:
+                trip_id:
+                  type: integer
+                  example: 12
+                seat_ids:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: integer
+                  example: [21, 22]
+      responses:
+        '200':
+          description: Réservation temporaire créée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationCreationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Places indisponibles ou réservation impossible.
+
+    get:
+      tags: [Réservations]
+      summary: Consulter son historique de réservations
+      responses:
+        '200':
+          description: Historique des réservations récupéré.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/reservations/{id}:
+    get:
+      tags: [Réservations]
+      summary: Consulter une réservation
+      description: Un utilisateur ne peut consulter que ses propres réservations.
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Détails de la réservation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/reservations/{id}/cancel:
+    patch:
+      tags: [Réservations]
+      summary: Annuler une réservation
+      description: |
+        L'annulation est possible uniquement si la réservation est encore
+        en attente et n'a pas été payée.
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Réservation annulée.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Réservation expirée ou non annulable.
+
+  /api/payments:
+    post:
+      tags: [Paiements]
+      summary: Créer une tentative de paiement simulé
+      description: |
+        Aucun débit réel n'est effectué. Le mode accepté est simulation.
+        Méthodes actuellement acceptées : mobile_money, card et cash.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reservation_id, payment_mode, payment_method]
+              properties:
+                reservation_id:
+                  type: integer
+                  example: 8
+                payment_mode:
+                  type: string
+                  enum: [simulation]
+                  example: simulation
+                payment_method:
+                  type: string
+                  enum: [mobile_money, card, cash]
+                  example: mobile_money
+      responses:
+        '200':
+          description: Tentative de paiement créée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Paiement déjà effectué ou tentative incompatible.
+
+  /api/payments/simulate:
+    post:
+      tags: [Paiements]
+      summary: Simuler le résultat d'un paiement
+      description: |
+        Route de démonstration. Le champ success indique si la simulation
+        doit être considérée comme réussie. Il ne s'agit pas d'une confirmation
+        provenant d'un opérateur ou d'une banque.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payment_id, success]
+              properties:
+                payment_id:
+                  type: integer
+                  example: 7
+                success:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Résultat de la simulation traité.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Paiement ou réservation non compatible avec la simulation.
+
+  /api/tickets:
+    get:
+      tags: [Billets]
+      summary: Lister les billets de l'utilisateur connecté
+      description: Retourne uniquement les billets appartenant à l'utilisateur connecté.
+      responses:
+        '200':
+          description: Liste des billets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/tickets/{id}:
+    get:
+      tags: [Billets]
+      summary: Consulter un billet
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Détails du billet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/tickets/{id}/pdf:
+    get:
+      tags: [Billets]
+      summary: Télécharger le billet au format PDF
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Fichier PDF du billet.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/chatbot/message:
+    post:
+      tags: [Chatbot]
+      summary: Envoyer un message au chatbot
+      description: |
+        Le chatbot utilise Groq et un contexte contrôlé provenant des données
+        accessibles à l'utilisateur connecté. Message limité à 2000 caractères.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  maxLength: 2000
+                  example: Quels sont mes billets ?
+      responses:
+        '200':
+          description: Réponse du chatbot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '502':
+          description: Service IA temporairement indisponible.
+
+  /api/admin/dashboard:
+    get:
+      tags: [Tableaux de bord]
+      summary: Statistiques globales de l'administrateur
+      description: Réservé au groupe admin.
+      responses:
+        '200':
+          description: Statistiques globales récupérées.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/company/dashboard:
+    get:
+      tags: [Tableaux de bord]
+      summary: Statistiques de la compagnie connectée
+      description: |
+        Réservé au groupe company_admin.
+        Les statistiques sont limitées à la compagnie associée au compte connecté.
+      responses:
+        '200':
+          description: Statistiques de la compagnie récupérées.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyDashboardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+      description: Jeton d'accès retourné par les routes register ou login.
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Identifiant numérique de la ressource.
+      schema:
+        type: integer
+        minimum: 1
+
+  responses:
+    BadRequest:
+      description: Requête invalide.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentification requise ou jeton invalide.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Accès interdit pour cet utilisateur.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Ressource introuvable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Erreur interne du serveur.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties: true
+
+    CollectionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    ObjectResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+
+    AuthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Jeton d'accès à transmettre dans Authorization.
+            token_type:
+              type: string
+              example: Bearer
+            expires_at:
+              type: string
+              nullable: true
+            user:
+              $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          example: traveler
+        company_id:
+          type: integer
+          nullable: true
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+        company_id:
+          type: integer
+        company_name:
+          type: string
+        company_logo:
+          type: string
+          nullable: true
+        route_id:
+          type: integer
+        departure_city_id:
+          type: integer
+        departure_city:
+          type: string
+        arrival_city_id:
+          type: integer
+        arrival_city:
+          type: string
+        estimated_duration_minutes:
+          type: integer
+        vehicle_id:
+          type: integer
+        vehicle_label:
+          type: string
+        vehicle_type:
+          type: string
+        departure_at:
+          type: string
+          format: date-time
+        arrival_at:
+          type: string
+          format: date-time
+        price:
+          type: number
+        available_seats:
+          type: integer
+
+    ReservationCreationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            reservation_id:
+              type: integer
+            reference:
+              type: string
+            number_of_seats:
+              type: integer
+            total_amount:
+              type: number
+            currency:
+              type: string
+              example: XOF
+            expires_in_minutes:
+              type: integer
+              example: 15
+
+    DashboardCounts:
+      type: object
+      properties:
+        total:
+          type: integer
+        scheduled:
+          type: integer
+        confirmed:
+          type: integer
+        pending:
+          type: integer
+        cancelled:
+          type: integer
+        expired:
+          type: integer
+        paid:
+          type: integer
+        failed:
+          type: integer
+        refunded:
+          type: integer
+        revenue:
+          type: number
+        valid:
+          type: integer
+        used:
+          type: integer
+        admins:
+          type: integer
+        company_admins:
+          type: integer
+        travelers:
+          type: integer
+        active:
+          type: integer
+
+    AdminDashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            users:
+              $ref: '#/components/schemas/DashboardCounts'
+            companies:
+              $ref: '#/components/schemas/DashboardCounts'
+            trips:
+              $ref: '#/components/schemas/DashboardCounts'
+            reservations:
+              $ref: '#/components/schemas/DashboardCounts'
+            payments:
+              $ref: '#/components/schemas/DashboardCounts'
+            tickets:
+              $ref: '#/components/schemas/DashboardCounts'
+
+    CompanyDashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            company_id:
+              type: integer
+            trips:
+              $ref: '#/components/schemas/DashboardCounts'
+            reservations:
+              $ref: '#/components/schemas/DashboardCounts'
+            travelers:
+              $ref: '#/components/schemas/DashboardCounts'
+            payments:
+              $ref: '#/components/schemas/DashboardCounts'
+            tickets:
+              $ref: '#/components/schemas/DashboardCounts'
