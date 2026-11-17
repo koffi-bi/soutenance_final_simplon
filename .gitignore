@@ -132,3 +132,7 @@ ticket-test.pdf
 # Sauvegardes temporaires
 *.bak
 *.bak-*
+
+# Frontend React / Vite
+/kaar-frontend/node_modules/
+/kaar-frontend/dist/
