@@ -190,15 +190,43 @@ class Database extends Config
         ],
     ];
 
-    public function __construct()
-    {
-        parent::__construct();
+   
 
-        // Ensure that we always set the database group to 'tests' if
-        // we are currently running an automated test suite, so that
-        // we don't overwrite live data on accident.
-        if (ENVIRONMENT === 'testing') {
-            $this->defaultGroup = 'tests';
-        }
+public function __construct()
+{
+    parent::__construct();
+
+    // Railway en priorité, puis configuration locale .env
+    $this->default['hostname'] = env(
+        'MYSQLHOST',
+        env('database.default.hostname', 'localhost')
+    );
+
+    $this->default['username'] = env(
+        'MYSQLUSER',
+        env('database.default.username', '')
+    );
+
+    $this->default['password'] = env(
+        'MYSQLPASSWORD',
+        env('database.default.password', '')
+    );
+
+    $this->default['database'] = env(
+        'MYSQLDATABASE',
+        env('database.default.database', '')
+    );
+
+    $this->default['port'] = (int) env(
+        'MYSQLPORT',
+        env('database.default.port', 3306)
+    );
+
+    $this->default['DBDebug'] = ENVIRONMENT !== 'production';
+
+    if (ENVIRONMENT === 'testing') {
+        $this->defaultGroup = 'tests';
     }
+}
+
 }
