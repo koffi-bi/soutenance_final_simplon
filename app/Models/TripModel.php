@@ -126,7 +126,7 @@ class TripModel extends Model
     /**
      * Retourne un voyage disponible par son identifiant.
      */
-    public function getAvailableTripById(int $id): ?array
+        public function getAvailableTripById(int $id): ?array
     {
         $trips = $this->getAvailableTrips([
             'trip_id' => $id,
@@ -134,4 +134,63 @@ class TripModel extends Model
 
         return $trips[0] ?? null;
     }
+
+    /**
+     * Retourne les sièges actifs d'un voyage avec leur disponibilité.
+     */
+    public function getTripSeats(int $tripId): array
+    {
+        $sql = "
+            SELECT
+                s.id,
+                s.seat_number,
+                s.seat_type,
+
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM reservation_seats rs
+                        INNER JOIN reservations res
+                            ON res.id = rs.reservation_id
+                        WHERE
+                            rs.trip_id = ?
+                            AND rs.seat_id = s.id
+                            AND (
+                                res.status = 'confirmed'
+                                OR (
+                                    res.status = 'pending'
+                                    AND res.expires_at > NOW()
+                                )
+                            )
+                    )
+                    THEN 0
+                    ELSE 1
+                END AS is_available
+
+            FROM seats s
+            INNER JOIN trips t
+                ON t.vehicle_id = s.vehicle_id
+
+            WHERE
+                t.id = ?
+                AND s.is_active = 1
+
+            ORDER BY s.seat_number ASC
+        ";
+
+        $seats = $this->db->query(
+            $sql,
+            [$tripId, $tripId]
+        )->getResultArray();
+
+        foreach ($seats as &$seat) {
+            $seat['id'] = (int) $seat['id'];
+            $seat['is_available'] = (bool) $seat['is_available'];
+        }
+
+        unset($seat);
+
+        return $seats;
+    }
 }
+

@@ -152,6 +152,55 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+
+  /api/trips/{id}/seats:
+    get:
+      tags: [Voyages]
+      summary: Consulter les sièges d'un voyage
+      description: Retourne les sièges actifs du véhicule et leur disponibilité réelle.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Liste des sièges récupérée.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Liste des sièges récupérée.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 21
+                        seat_number:
+                          type: string
+                          example: "01"
+                        seat_type:
+                          type: string
+                          example: standard
+                        is_available:
+                          type: boolean
+                          example: true
+                  total:
+                    type: integer
+                    example: 32
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Identifiant de voyage invalide.
+
+
   /api/auth/register:
     post:
       tags: [Authentification]

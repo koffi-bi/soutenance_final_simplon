@@ -108,10 +108,48 @@ class TripController extends ResourceController
             );
         }
 
-        return $this->respond([
+               return $this->respond([
             'status' => 'success',
             'message' => 'Voyage récupéré.',
             'data' => $trip,
         ], 200);
     }
+
+    /**
+     * GET /api/trips/{id}/seats
+     *
+     * Retourne les sièges actifs d'un voyage
+     * avec leur disponibilité.
+     */
+    public function seats($id = null)
+    {
+        $tripId = filter_var($id, FILTER_VALIDATE_INT);
+
+        if ($tripId === false || $tripId < 1) {
+            return $this->failValidationErrors([
+                'id' => 'Identifiant de voyage invalide.',
+            ]);
+        }
+
+        $tripModel = new TripModel();
+
+        // Vérifier que le voyage est toujours accessible.
+        $trip = $tripModel->getAvailableTripById($tripId);
+
+        if (!$trip) {
+            return $this->failNotFound(
+                'Voyage introuvable ou indisponible.'
+            );
+        }
+
+        $seats = $tripModel->getTripSeats($tripId);
+
+        return $this->respond([
+            'status' => 'success',
+            'message' => 'Liste des sièges récupérée.',
+            'data' => $seats,
+            'total' => count($seats),
+        ], 200);
+    }
 }
+

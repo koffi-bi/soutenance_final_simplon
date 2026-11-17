@@ -15,6 +15,8 @@ $routes->get('api/companies/(:num)', 'CompanyController::show/$1');
 $routes->get('api/trips', 'Api\TripController::index');
 $routes->get('api/trips/(:num)', 'Api\TripController::show/$1');
 
+$routes->get('api/trips/(:num)/seats', 'Api\TripController::seats/$1');
+
 
 // Réservation : accès réservé aux utilisateurs authentifiés.
 $routes->post(
@@ -142,6 +144,8 @@ $routes->options('api/cities', static function () {});
 
 $routes->options('api/trips', static function () {});
 $routes->options('api/trips/(:num)', static function () {});
+
+$routes->options('api/trips/(:num)/seats', static function () {});
 
 $routes->options('api/companies', static function () {});
 $routes->options('api/companies/(:num)', static function () {});
