@@ -26,9 +26,9 @@ class Cors extends BaseConfig
      */
     public array $default = [
     'allowedOrigins' => [
-        'http://localhost:5173',
-    ],
-
+    'http://localhost:5173',
+    'https://reservationcar.netlify.app',
+],
     'allowedOriginsPatterns' => [],
 
     // L'authentification utilise un Bearer Token, pas des cookies.
