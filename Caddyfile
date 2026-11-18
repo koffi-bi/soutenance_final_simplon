@@ -1,4 +1,3 @@
-
 {
     admin off
     persist_config off
@@ -11,6 +10,8 @@
     }
 
     frankenphp {
+        php_ini post_max_size 30M
+        php_ini upload_max_filesize 30M
     }
 }
 
