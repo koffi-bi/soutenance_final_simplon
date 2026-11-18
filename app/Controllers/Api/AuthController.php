@@ -168,7 +168,26 @@ $authenticator = auth('session')->getAuthenticator();
 
 public function register()
 {
-    $data = $this->request->getJSON(true);
+    $rawBody = (string) $this->request->getBody();
+
+    $data = json_decode($rawBody, true);
+    $jsonError = json_last_error();
+    $jsonErrorMessage = json_last_error_msg();
+
+    log_message('error', 'AUTH_REGISTER_DIAG ' . json_encode([
+        'content_type'   => $this->request->getHeaderLine('Content-Type'),
+        'content_length' => $this->request->getHeaderLine('Content-Length'),
+        'body_length'    => strlen($rawBody),
+        'prefix_hex'     => bin2hex(substr($rawBody, 0, 8)),
+       'json_error' => $jsonErrorMessage,
+    ]));
+
+  if ($jsonError !== JSON_ERROR_NONE) {
+        return $this->response->setStatusCode(400)->setJSON([
+            'status'  => 'error',
+            'message' => 'Format JSON invalide.',
+        ]);
+    }
 
     if (! is_array($data)) {
         return $this->response->setStatusCode(400)->setJSON([
