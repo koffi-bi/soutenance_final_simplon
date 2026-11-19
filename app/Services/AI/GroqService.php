@@ -91,7 +91,11 @@ class GroqService
             $result = json_decode($response->getBody(), true);
 
             if ($statusCode < 200 || $statusCode >= 300) {
-                log_message('error', 'Erreur Groq HTTP : ' . $statusCode);
+                log_message(
+    'error',
+    'Erreur Groq HTTP : ' . $statusCode
+    . ' | Réponse : ' . substr((string) $response->getBody(), 0, 2000)
+);
 
                 return [
                     'success' => false,
