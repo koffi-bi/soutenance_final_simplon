@@ -136,3 +136,6 @@ ticket-test.pdf
 # Frontend React / Vite
 /kaar-frontend/node_modules/
 /kaar-frontend/dist/
+
+# Sauvegardes locales de la base de données
+/backups/
